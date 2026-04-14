@@ -16,15 +16,18 @@ function getTempColor(temp: number): string {
   return "#E24B4A"
 }
 
-interface TooltipProps {
-  active?:  boolean
-  payload?: any[]
-  label?:   string
+interface TooltipPayloadItem {
+  payload: WeatherData
 }
 
-function CustomTooltip({ active, payload, label }: TooltipProps) {
+interface CustomTooltipProps {
+  active?:  boolean
+  payload?: TooltipPayloadItem[]
+}
+
+function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
-  const d = payload[0].payload as WeatherData
+  const d = payload[0].payload
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm text-xs">
       <p className="font-medium text-gray-800 mb-1">{d.station}</p>
@@ -45,18 +48,9 @@ export function TempChart({ data }: { data: WeatherData[] }) {
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={sorted} margin={{ top: 8, right: 8, left: -20, bottom: 50 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-        <XAxis
-          dataKey="station"
-          tick={{ fontSize: 11, fill: "#94a3b8" }}
-          angle={-35}
-          textAnchor="end"
-          interval={0}
-        />
-        <YAxis
-          tick={{ fontSize: 11, fill: "#94a3b8" }}
-          unit="°"
-          domain={["auto", "auto"]}
-        />
+        <XAxis dataKey="station" tick={{ fontSize: 11, fill: "#94a3b8" }}
+          angle={-35} textAnchor="end" interval={0} />
+        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} unit="°" domain={["auto", "auto"]} />
         <ReferenceLine y={0} stroke="#E24B4A" strokeDasharray="4 4" strokeWidth={1} />
         <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="temp" radius={[4, 4, 0, 0]} maxBarSize={40}>

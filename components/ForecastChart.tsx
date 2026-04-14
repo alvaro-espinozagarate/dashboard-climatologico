@@ -18,17 +18,21 @@ interface Props {
   stations: string[]
 }
 
+interface ChartRow {
+  time: string
+  [station: string]: string | number
+}
+
 export function ForecastChart({ data, stations }: Props) {
   const [selected, setSelected] = useState<string[]>(stations.slice(0, 5))
 
-  // Agrupar por datetime → pivot por estación
-  const byDate = data.reduce((acc, item) => {
-    const d    = new Date(item.datetime)
-    const key  = `${item.date} ${String(d.getUTCHours()).padStart(2,"0")}h`
+  const byDate = data.reduce((acc: Record<string, ChartRow>, item) => {
+    const d   = new Date(item.datetime)
+    const key = `${item.date} ${String(d.getUTCHours()).padStart(2, "0")}h`
     if (!acc[key]) acc[key] = { time: key }
     acc[key][item.station] = item.temp
     return acc
-  }, {} as Record<string, any>)
+  }, {})
 
   const chartData = Object.values(byDate)
 
@@ -39,12 +43,11 @@ export function ForecastChart({ data, stations }: Props) {
 
   return (
     <div>
-      {/* Selector de estaciones */}
       <div className="flex flex-wrap gap-2 mb-4">
         {stations.map((st) => {
-          const idx     = stations.indexOf(st)
-          const color   = COLORS[idx % COLORS.length]
-          const active  = selected.includes(st)
+          const idx    = stations.indexOf(st)
+          const color  = COLORS[idx % COLORS.length]
+          const active = selected.includes(st)
           return (
             <button key={st} onClick={() => toggle(st)}
               className="px-3 py-1 text-xs rounded-full border transition-all"
@@ -61,16 +64,8 @@ export function ForecastChart({ data, stations }: Props) {
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-          <XAxis
-            dataKey="time"
-            tick={{ fontSize: 10, fill: "#94a3b8" }}
-            interval={7}
-          />
-          <YAxis
-            tick={{ fontSize: 11, fill: "#94a3b8" }}
-            unit="°"
-            domain={["auto", "auto"]}
-          />
+          <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#94a3b8" }} interval={7} />
+          <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} unit="°" domain={["auto", "auto"]} />
           <Tooltip
             contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #e5e7eb" }}
             formatter={(val: number, name: string) => [`${val?.toFixed(1)}°C`, name]}
@@ -78,14 +73,9 @@ export function ForecastChart({ data, stations }: Props) {
           {selected.map((st) => {
             const idx = stations.indexOf(st)
             return (
-              <Line
-                key={st}
-                type="monotone"
-                dataKey={st}
+              <Line key={st} type="monotone" dataKey={st}
                 stroke={COLORS[idx % COLORS.length]}
-                strokeWidth={1.5}
-                dot={false}
-                connectNulls
+                strokeWidth={1.5} dot={false} connectNulls
               />
             )
           })}

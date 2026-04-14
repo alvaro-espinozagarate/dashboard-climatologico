@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import type { Map, Marker, DivIcon } from "leaflet"
 import { WeatherData } from "@/lib/types"
 
 type MapMode = "temperatura" | "alerta"
@@ -29,12 +30,17 @@ function getAlertColor(alert: WeatherData["alert"]): string {
   }
 }
 
+// Tipo para el contenedor del mapa con _leaflet_id interno
+interface LeafletContainer extends HTMLDivElement {
+  _leaflet_id?: number
+}
+
 export function WeatherMap({ data }: Props) {
-  const mapRef      = useRef<HTMLDivElement>(null)
-  const mapInstance = useRef<any>(null)
-  const markersRef  = useRef<any[]>([])
-  const [mode, setMode]       = useState<MapMode>("temperatura")
-  const [mapReady, setMapReady] = useState(false) // ← nuevo flag
+  const mapRef      = useRef<LeafletContainer>(null)
+  const mapInstance = useRef<Map | null>(null)
+  const markersRef  = useRef<Marker[]>([])
+  const [mode, setMode]         = useState<MapMode>("temperatura")
+  const [mapReady, setMapReady] = useState(false)
 
   // Inicializar mapa una sola vez
   useEffect(() => {
@@ -42,19 +48,19 @@ export function WeatherMap({ data }: Props) {
     if (!mapRef.current)               return
     if (mapInstance.current)           return
 
-    // Limpiar _leaflet_id si quedó de un montaje anterior
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((mapRef.current as any)._leaflet_id) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(mapRef.current as any)._leaflet_id = undefined
+    if (mapRef.current._leaflet_id) {
+      mapRef.current._leaflet_id = undefined
     }
 
     import("leaflet").then((L) => {
       if (!mapRef.current)     return
       if (mapInstance.current) return
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (L.Icon.Default.prototype as any)._getIconUrl
+      const IconDefault = L.Icon.Default as typeof L.Icon.Default & {
+        prototype: { _getIconUrl?: () => string }
+      }
+      delete IconDefault.prototype._getIconUrl
+
       L.Icon.Default.mergeOptions({
         iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
         iconUrl:       "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -74,8 +80,6 @@ export function WeatherMap({ data }: Props) {
       }).addTo(map)
 
       mapInstance.current = map
-
-      // ← Avisar que el mapa está listo DESPUÉS de que Leaflet termina
       map.whenReady(() => setMapReady(true))
     })
 
@@ -89,14 +93,13 @@ export function WeatherMap({ data }: Props) {
     }
   }, [])
 
-  // Pintar marcadores solo cuando el mapa está listo Y hay datos
+  // Pintar marcadores cuando mapa está listo y hay datos
   useEffect(() => {
-    if (!mapReady)             return
-    if (!mapInstance.current)  return
-    if (!data.length)          return
+    if (!mapReady)            return
+    if (!mapInstance.current) return
+    if (!data.length)         return
 
     import("leaflet").then((L) => {
-      // Limpiar marcadores anteriores
       markersRef.current.forEach(m => m.remove())
       markersRef.current = []
 
@@ -105,7 +108,7 @@ export function WeatherMap({ data }: Props) {
           ? getTempColor(d.temp)
           : getAlertColor(d.alert)
 
-        const icon = L.divIcon({
+        const icon: DivIcon = L.divIcon({
           className: "",
           html: `<div style="
             width:32px;height:32px;
@@ -123,7 +126,6 @@ export function WeatherMap({ data }: Props) {
 
         const marker = L.marker([d.lat, d.lon], { icon })
 
-        // Tooltip rápido (hover)
         marker.bindTooltip(`
           <div style="font-size:12px;line-height:1.5">
             <strong>${d.station}</strong><br/>
@@ -134,7 +136,6 @@ export function WeatherMap({ data }: Props) {
           opacity:   0.95,
         })
 
-        // Popup completo (click)
         marker.bindPopup(`
           <div style="font-size:12px;line-height:1.7;min-width:190px">
             <p style="font-size:14px;font-weight:600;margin:0 0 4px">${d.station}</p>
@@ -172,15 +173,16 @@ export function WeatherMap({ data }: Props) {
             ">${d.alert}</div>
           </div>`, { maxWidth: 260 })
 
-        marker.addTo(mapInstance.current)
-        markersRef.current.push(marker)
+        if (mapInstance.current) {
+          marker.addTo(mapInstance.current)
+          markersRef.current.push(marker)
+        }
       })
     })
-  }, [mapReady, data, mode]) // ← mapReady como dependencia
+  }, [mapReady, data, mode])
 
   return (
     <div>
-      {/* Toggle modo */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex gap-1 bg-gray-100 rounded-full p-1">
           {(["temperatura", "alerta"] as MapMode[]).map(m => (
@@ -196,13 +198,11 @@ export function WeatherMap({ data }: Props) {
         <span className="text-xs text-gray-400">{data.length} estaciones</span>
       </div>
 
-      {/* Contenedor del mapa */}
       <div
         ref={mapRef}
         style={{ height: "420px", borderRadius: "10px", overflow: "hidden", zIndex: 0 }}
       />
 
-      {/* Leyenda */}
       <div className="flex flex-wrap gap-3 mt-3">
         {mode === "temperatura" ? (
           <>
