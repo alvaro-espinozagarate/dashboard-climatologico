@@ -89,7 +89,6 @@ senamhi-dashboard/
 ## ⚠️ Seguridad
 
 - **Nunca subas `.env.local` a GitHub** — está en `.gitignore`
-- La API key vive solo en Vercel (servidor) y en tu `.env.local` local
 - Las rutas `/api/weather` y `/api/forecast` actúan como proxy seguro
 - El navegador del usuario nunca ve la API key
 
