@@ -32,10 +32,10 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm text-xs">
       <p className="font-medium text-gray-800 mb-1">{d.station}</p>
       <p className="text-gray-500">{d.dept} · {d.region}</p>
-      <p className="mt-1">🌡️ {d.temp.toFixed(1)}°C <span className="text-gray-400">(sens. {d.feels_like.toFixed(1)}°C)</span></p>
-      <p>💧 Humedad: {d.humidity}%</p>
-      <p>🌬️ Viento: {d.wind_speed.toFixed(1)} m/s</p>
-      {d.rain_1h > 0 && <p>🌧️ Lluvia: {d.rain_1h.toFixed(1)} mm/h</p>}
+      <p className="mt-1">↪ {d.temp.toFixed(1)}°C <span className="text-gray-400">(sens. {d.feels_like.toFixed(1)}°C)</span></p>
+      <p>↪ Humedad: {d.humidity}%</p>
+      <p>↪ Viento: {d.wind_speed.toFixed(1)} m/s</p>
+      {d.rain_1h > 0 && <p>↪ Lluvia: {d.rain_1h.toFixed(1)} mm/h</p>}
       <p className="mt-1 text-gray-400 capitalize">{d.description}</p>
     </div>
   )

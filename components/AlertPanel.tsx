@@ -1,9 +1,10 @@
 import { WeatherData }                  from "@/lib/types"
-import { AlertTriangle, CloudRain, Thermometer, CheckCircle } from "lucide-react"
+import { CloudRain, Thermometer, CheckCircle } from "lucide-react"
+import { ComponentType } from "react"
 
 type AlertType = WeatherData["alert"]
 
-const ALERT_CONFIG: Record<AlertType, { bg: string; icon: any; label: string }> = {
+const ALERT_CONFIG: Record<AlertType, { bg: string; icon: ComponentType<{ size?: number }>; label: string }> = {
   "Helada severa":   { bg: "bg-red-50 border-red-300 text-red-800",       icon: Thermometer, label: "Helada severa"   },
   "Helada moderada": { bg: "bg-orange-50 border-orange-300 text-orange-800", icon: Thermometer, label: "Helada moderada" },
   "Lluvia intensa":  { bg: "bg-blue-50 border-blue-300 text-blue-800",    icon: CloudRain,   label: "Lluvia intensa"  },
