@@ -1,11 +1,10 @@
 # 🌦️ Monitor Climático Perú — Dashboard
 
-Dashboard de estaciones meteorológicas automáticas basado en OpenWeatherMap, construido con Next.js 14 y desplegable en Vercel de forma gratuita.
+Dashboard de estaciones meteorológicas automáticas basado en OpenWeatherMap, construido con Next.js 14 y desplegable.
 
 ## ✅ Requisitos previos
 
 - Node.js 18+
-- Cuenta en [Vercel](https://vercel.com) (gratis)
 - API Key de [OpenWeatherMap](https://openweathermap.org/api) (plan gratuito)
 
 ---
@@ -27,28 +26,6 @@ npm run dev
 ```
 
 Abre http://localhost:3000
-
----
-
-## 🌐 Deploy en Vercel
-
-```bash
-# 1. Subir a GitHub
-git init
-git add .
-git commit -m "feat: dashboard clima peru"
-git remote add origin https://github.com/TU_USUARIO/senamhi-dashboard.git
-git push -u origin main
-```
-
-Luego en Vercel:
-1. Ir a https://vercel.com → **New Project**
-2. Importar el repositorio de GitHub
-3. En **Environment Variables** agregar:
-   - `OWM_API_KEY` = tu API key de OpenWeatherMap
-4. Clic en **Deploy**
-
-Tu dashboard estará en: `https://tu-proyecto.vercel.app`
 
 ---
 
