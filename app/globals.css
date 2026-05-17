@@ -2,93 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Leaflet CSS */
-@import "leaflet/dist/leaflet.css";
+/* MapLibre CSS */
+@import "maplibre-gl/dist/maplibre-gl.css";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Design tokens ─────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   Filosofía: fondo frío neutro, acento azul cielo sin saturar,
+   texto con contraste AAA, alertas con hue propio por categoría.
+   ═══════════════════════════════════════════════════════════ */
 :root {
-  --color-bg-page:     #F0F4F8;
-  --color-bg-surface:  #FFFFFF;
-  --color-bg-subtle:   #EBF0F6;
-  --color-border:      #E2E8F0;
-  --color-border-strong: #CBD5E1;
+  /* Fondos — escalonados: page < surface < elevated */
+  --bg-page:     #EEF2F7;   /* gris azulado suave, no blanco plano */
+  --bg-surface:  #FFFFFF;
+  --bg-elevated: #F6F9FC;   /* hover de filas, fondo de toggle inactivo */
 
-  --color-accent:      #0066CC;
-  --color-accent-hover:#0052A3;
-  --color-accent-light:#E3F0FF;
+  /* Bordes */
+  --border:       #D8E2EE;
+  --border-strong:#ADBDD0;
 
-  --color-text-primary:   #0F1D2E;
-  --color-text-secondary: #4A5E72;
-  --color-text-muted:     #8FA3B8;
+  /* Acento — azul cielo institucional, no el blue-600 de Tailwind */
+  --accent:       #1A6FB5;  /* WCAG AA sobre blanco: ✓ */
+  --accent-dim:   #E8F2FB;  /* fondo de badge acento */
 
-  /* Alertas semánticas */
-  --alert-rain-moderate-bg:     #E3F2FD;
-  --alert-rain-moderate-border: #90CAF9;
-  --alert-rain-moderate-text:   #1565C0;
-  --alert-rain-heavy-bg:        #E8EAF6;
-  --alert-rain-heavy-border:    #9FA8DA;
-  --alert-rain-heavy-text:      #283593;
-  --alert-frost-moderate-bg:    #FFF8E1;
-  --alert-frost-moderate-border:#FFD54F;
-  --alert-frost-moderate-text:  #E65100;
-  --alert-frost-severe-bg:      #FBE9E7;
-  --alert-frost-severe-border:  #FF8A65;
-  --alert-frost-severe-text:    #BF360C;
-  --alert-normal-bg:            #E8F5E9;
-  --alert-normal-border:        #A5D6A7;
-  --alert-normal-text:          #1B5E20;
+  /* Texto — trio: primario / secundario / muted */
+  --text-1: #0D1F35;        /* casi negro azulado, más suave que #000 */
+  --text-2: #3D5570;        /* texto secundario: contraste 5.4:1 sobre blanco */
+  --text-3: #7A93AD;        /* muted / labels: contraste 3.5:1 sobre blanco */
+
+  /* ── Alertas ── cada categoría tiene hue propio
+     Lluvia:  azul (200–220°)
+     Helada:  azul-violeta frío (240–260°) para distinguir de lluvia
+     Normal:  verde (140–160°)             */
+
+  --alert-rain-mod-bg:     #EBF4FD;
+  --alert-rain-mod-border: #7BBFEE;
+  --alert-rain-mod-text:   #1A5F9E;
+
+  --alert-rain-heavy-bg:     #E6EBF8;
+  --alert-rain-heavy-border: #7B92D9;
+  --alert-rain-heavy-text:   #2236A0;
+
+  --alert-frost-mod-bg:     #FFF3E0;
+  --alert-frost-mod-border: #FFAB40;
+  --alert-frost-mod-text:   #BF5000;
+
+  --alert-frost-severe-bg:     #FDECEA;
+  --alert-frost-severe-border: #F08080;
+  --alert-frost-severe-text:   #B71C1C;
+
+  --alert-ok-bg:     #E8F5EE;
+  --alert-ok-border: #6DBF8F;
+  --alert-ok-text:   #1A6B40;
 }
 
 .dark {
-  --color-bg-page:     #111B27;
-  --color-bg-surface:  #1A2638;
-  --color-bg-subtle:   #1F2E40;
-  --color-border:      #263548;
-  --color-border-strong: #324860;
+  /* Fondos — azul marino, no negro carbón */
+  --bg-page:     #0F1923;
+  --bg-surface:  #172130;
+  --bg-elevated: #1E2C3D;
 
-  --color-accent:      #3B9EFF;
-  --color-accent-hover:#5AADFF;
-  --color-accent-light:#0D2A47;
+  /* Bordes — visibles pero no agresivos */
+  --border:       #253547;
+  --border-strong:#3A5070;
 
-  --color-text-primary:   #E8F1FA;
-  --color-text-secondary: #8BA5BF;
-  --color-text-muted:     #4E6577;
+  /* Acento — más claro para contraste sobre oscuro */
+  --accent:       #4DA6FF;
+  --accent-dim:   #0D2540;
 
-  /* Alertas semánticas — modo oscuro */
-  --alert-rain-moderate-bg:     #0D2240;
-  --alert-rain-moderate-border: #1E4D80;
-  --alert-rain-moderate-text:   #90CAF9;
-  --alert-rain-heavy-bg:        #12174A;
-  --alert-rain-heavy-border:    #3949AB;
-  --alert-rain-heavy-text:      #9FA8DA;
-  --alert-frost-moderate-bg:    #2C1F00;
-  --alert-frost-moderate-border:#7A5800;
-  --alert-frost-moderate-text:  #FFD54F;
-  --alert-frost-severe-bg:      #2C1000;
-  --alert-frost-severe-border:  #8B3A00;
-  --alert-frost-severe-text:    #FF8A65;
-  --alert-normal-bg:            #0A2210;
-  --alert-normal-border:        #1B5E20;
-  --alert-normal-text:          #A5D6A7;
+  /* Texto */
+  --text-1: #DCE9F5;
+  --text-2: #7FA8C9;
+  --text-3: #405F78;
+
+  /* Alertas oscuro — fondos muy bajos en saturación para no competir con el mapa */
+  --alert-rain-mod-bg:     #0C2035;
+  --alert-rain-mod-border: #1E5080;
+  --alert-rain-mod-text:   #7BBFEE;
+
+  --alert-rain-heavy-bg:     #0D1440;
+  --alert-rain-heavy-border: #2D45A0;
+  --alert-rain-heavy-text:   #8BA4E8;
+
+  --alert-frost-mod-bg:     #2A1800;
+  --alert-frost-mod-border: #7A4800;
+  --alert-frost-mod-text:   #FFAB40;
+
+  --alert-frost-severe-bg:     #280A08;
+  --alert-frost-severe-border: #7A2020;
+  --alert-frost-severe-text:   #F08080;
+
+  --alert-ok-bg:     #071A10;
+  --alert-ok-border: #1A5530;
+  --alert-ok-text:   #6DBF8F;
 }
 
-/* ── Base ──────────────────────────────────────────────────── */
+/* ── Base ─────────────────────────────────────────────────── */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--color-bg-page);
-  color: var(--color-text-primary);
+  background: var(--bg-page);
+  color: var(--text-1);
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* ── Leaflet z-index ───────────────────────────────────────── */
-.leaflet-pane        { z-index: 1 !important; }
-.leaflet-top,
-.leaflet-bottom      { z-index: 2 !important; }
-.leaflet-control     { z-index: 2 !important; }
-.leaflet-popup-pane  { z-index: 3 !important; }
+/* ── MapLibre overrides ───────────────────────────────────── */
+.maplibregl-map { border-radius: inherit; }
+
+.maplibregl-popup-content {
+  background:    var(--bg-surface) !important;
+  color:         var(--text-1)     !important;
+  border:        1px solid var(--border) !important;
+  border-radius: 10px  !important;
+  padding:       0     !important;
+  box-shadow:    0 8px 28px rgba(0,0,0,0.20) !important;
+}
+.maplibregl-popup-tip { display: none !important; }
+
+.maplibregl-ctrl-group {
+  border-radius: 8px !important;
+  border:        1px solid var(--border) !important;
+  box-shadow:    0 2px 8px rgba(0,0,0,0.12) !important;
+  overflow:      hidden;
+}
+.maplibregl-ctrl-group button {
+  background: var(--bg-surface) !important;
+}

@@ -16,8 +16,8 @@ const WeatherMap = dynamic(
   { ssr: false, loading: () => (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "center",
-      height: 384, background: "var(--color-bg-subtle)",
-      borderRadius: 12, color: "var(--color-text-muted)", fontSize: 13,
+      height: 384, background: "var(--bg-elevated)",
+      borderRadius: 12, color: "var(--text-3)", fontSize: 13,
     }}>
       Cargando mapa...
     </div>
@@ -89,8 +89,8 @@ export default function Dashboard() {
   ]
 
   const surface = {
-    background: "var(--color-bg-surface)",
-    border: "1px solid var(--color-border)",
+    background: "var(--bg-surface)",
+    border: "1px solid var(--border)",
     borderRadius: 12,
     padding: 16,
   }
@@ -98,7 +98,7 @@ export default function Dashboard() {
   return (
     <main style={{
       minHeight: "100vh",
-      background: "var(--color-bg-page)",
+      background: "var(--bg-page)",
       padding: "24px",
       transition: "background 0.25s ease",
     }}>
@@ -116,15 +116,15 @@ export default function Dashboard() {
           <h1 style={{
             fontSize: 15,
             fontWeight: 500,
-            color: "var(--color-text-primary)",
+            color: "var(--text-1)",
             display: "flex",
             alignItems: "center",
             gap: 8,
           }}>
-            <Radio size={15} style={{ color: "var(--color-accent)" }} />
+            <Radio size={15} style={{ color: "var(--accent)" }} />
             Monitor Climático — Perú
           </h1>
-          <p style={{ fontSize: 11, color: "var(--color-text-muted)", marginTop: 2 }}>
+          <p style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
             {weather.length} estaciones · OpenWeatherMap · 25 departamentos
           </p>
         </div>
@@ -133,8 +133,8 @@ export default function Dashboard() {
           {/* Filtro región */}
           <div style={{
             display: "flex", gap: 2,
-            background: "var(--color-bg-surface)",
-            border: "1px solid var(--color-border)",
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border)",
             borderRadius: 999,
             padding: "3px",
           }}>
@@ -146,8 +146,8 @@ export default function Dashboard() {
                 border: "none",
                 cursor: "pointer",
                 transition: "all 0.15s",
-                background: region === r ? "var(--color-accent)" : "transparent",
-                color: region === r ? "#fff" : "var(--color-text-secondary)",
+                background: region === r ? "var(--accent)" : "transparent",
+                color: region === r ? "#fff" : "var(--text-2)",
                 fontWeight: region === r ? 500 : 400,
               }}>{r}</button>
             ))}
@@ -158,9 +158,9 @@ export default function Dashboard() {
             display: "flex", alignItems: "center", gap: 6,
             padding: "5px 12px",
             fontSize: 11,
-            border: "1px solid var(--color-border)",
-            background: "var(--color-bg-surface)",
-            color: "var(--color-text-secondary)",
+            border: "1px solid var(--border)",
+            background: "var(--bg-surface)",
+            color: "var(--text-2)",
             borderRadius: 999,
             cursor: loading ? "not-allowed" : "pointer",
             opacity: loading ? 0.5 : 1,
@@ -176,9 +176,9 @@ export default function Dashboard() {
             style={{
               width: 32, height: 32,
               display: "flex", alignItems: "center", justifyContent: "center",
-              border: "1px solid var(--color-border)",
-              background: "var(--color-bg-surface)",
-              color: "var(--color-text-secondary)",
+              border: "1px solid var(--border)",
+              background: "var(--bg-surface)",
+              color: "var(--text-2)",
               borderRadius: "50%",
               cursor: "pointer",
               transition: "all 0.15s",
@@ -199,7 +199,7 @@ export default function Dashboard() {
           fontSize: 12,
           color: "var(--alert-frost-severe-text)",
         }}>
-          {error}
+          ⚠️ {error}
         </div>
       )}
 
@@ -220,7 +220,7 @@ export default function Dashboard() {
       {/* ── Tabs ── */}
       <div style={{
         display: "flex", gap: 0,
-        borderBottom: "1px solid var(--color-border)",
+        borderBottom: "1px solid var(--border)",
         marginBottom: 16,
       }}>
         {TABS.map(t => (
@@ -229,10 +229,10 @@ export default function Dashboard() {
             fontSize: 12,
             fontWeight: tab === t.key ? 500 : 400,
             border: "none",
-            borderBottom: tab === t.key ? "2px solid var(--color-accent)" : "2px solid transparent",
+            borderBottom: tab === t.key ? "2px solid var(--accent)" : "2px solid transparent",
             marginBottom: -1,
             background: "transparent",
-            color: tab === t.key ? "var(--color-accent)" : "var(--color-text-secondary)",
+            color: tab === t.key ? "var(--accent)" : "var(--text-2)",
             cursor: "pointer",
             transition: "all 0.15s",
           }}>{t.label}</button>
@@ -244,15 +244,15 @@ export default function Dashboard() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)", gap: 16 }}>
             <div style={surface}>
-              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 12 }}>
+              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-3)", marginBottom: 12 }}>
                 Temperatura actual por estación
               </p>
               {loading && !weather.length
-                ? <div style={{ height: 192, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando...</div>
+                ? <div style={{ height: 192, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", fontSize: 13 }}>Cargando...</div>
                 : <TempChart data={filtered} />}
             </div>
             <div style={surface}>
-              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 12 }}>
+              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-3)", marginBottom: 12 }}>
                 Eventos extremos
               </p>
               <AlertPanel data={filtered} />
@@ -272,11 +272,11 @@ export default function Dashboard() {
                   borderLeft: `3px solid ${accentLeft[reg]}`,
                   borderRadius: "0 12px 12px 0",
                 }}>
-                  <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 6 }}>{reg}</p>
-                  <p style={{ fontSize: 20, fontWeight: 500, color: "var(--color-text-primary)", lineHeight: 1 }}>
-                    {avg}°C <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 400 }}>promedio</span>
+                  <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-3)", marginBottom: 6 }}>{reg}</p>
+                  <p style={{ fontSize: 20, fontWeight: 500, color: "var(--text-1)", lineHeight: 1 }}>
+                    {avg}°C <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 400 }}>promedio</span>
                   </p>
-                  <p style={{ fontSize: 11, color: "var(--color-text-secondary)", marginTop: 6 }}>
+                  <p style={{ fontSize: 11, color: "var(--text-2)", marginTop: 6 }}>
                     <span style={{ color: "#E53935" }}>↑ {max}°</span>
                     {" / "}
                     <span style={{ color: "#42A5F5" }}>↓ {min}°</span>
@@ -292,11 +292,11 @@ export default function Dashboard() {
       {/* ── Mapa ── */}
       {tab === "mapa" && (
         <div style={surface}>
-          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 12 }}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-3)", marginBottom: 12 }}>
             Mapa geográfico de estaciones — {filtered.length} puntos
           </p>
           {loading && !weather.length
-            ? <div style={{ height: 384, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando datos...</div>
+            ? <div style={{ height: 384, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", fontSize: 13 }}>Cargando datos...</div>
             : <WeatherMap data={filtered} />}
         </div>
       )}
@@ -304,11 +304,11 @@ export default function Dashboard() {
       {/* ── Tabla ── */}
       {tab === "tabla" && (
         <div style={surface}>
-          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 16 }}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-3)", marginBottom: 16 }}>
             Detalle por estación — {filtered.length} registros
           </p>
           {loading && !weather.length
-            ? <div style={{ height: 128, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando...</div>
+            ? <div style={{ height: 128, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", fontSize: 13 }}>Cargando...</div>
             : <StatsTable data={filtered} />}
         </div>
       )}
@@ -316,11 +316,11 @@ export default function Dashboard() {
       {/* ── Pronóstico ── */}
       {tab === "pronostico" && (
         <div style={surface}>
-          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 16 }}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-3)", marginBottom: 16 }}>
             Pronóstico 5 días — temperatura cada 3 horas
           </p>
           {loading && !forecast.length
-            ? <div style={{ height: 192, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando pronóstico...</div>
+            ? <div style={{ height: 192, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", fontSize: 13 }}>Cargando pronóstico...</div>
             : <ForecastChart
                 data={forecast.filter(f =>
                   region === "Todas" ? true : filtered.map(w => w.station).includes(f.station)
@@ -333,7 +333,7 @@ export default function Dashboard() {
       <p style={{
         textAlign: "center",
         fontSize: 11,
-        color: "var(--color-text-muted)",
+        color: "var(--text-3)",
         marginTop: 24,
         opacity: 0.6,
       }}>
