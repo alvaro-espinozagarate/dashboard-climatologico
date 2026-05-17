@@ -8,13 +8,17 @@ import { AlertPanel }   from "@/components/AlertPanel"
 import { TempChart }    from "@/components/TempChart"
 import { ForecastChart} from "@/components/ForecastChart"
 import { StatsTable }   from "@/components/StatsTable"
-import { RefreshCw, Radio } from "lucide-react"
+import { RefreshCw, Radio, Sun, Moon } from "lucide-react"
+import { useTheme } from "@/lib/ThemeContext"
 
-// Leaflet necesita window → cargar sin SSR
 const WeatherMap = dynamic(
   () => import("@/components/WeatherMap").then(m => m.WeatherMap),
   { ssr: false, loading: () => (
-    <div className="flex items-center justify-center h-96 bg-gray-50 rounded-xl text-gray-400 text-sm">
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      height: 384, background: "var(--color-bg-subtle)",
+      borderRadius: 12, color: "var(--color-text-muted)", fontSize: 13,
+    }}>
       Cargando mapa...
     </div>
   )}
@@ -23,7 +27,14 @@ const WeatherMap = dynamic(
 type Region = "Todas" | "Costa" | "Sierra" | "Selva"
 type Tab    = "resumen" | "mapa" | "tabla" | "pronostico"
 
+const accentLeft: Record<string, string> = {
+  Costa:  "#0066CC",
+  Sierra: "#5E35B1",
+  Selva:  "#00897B",
+}
+
 export default function Dashboard() {
+  const { theme, toggle } = useTheme()
   const [weather,    setWeather]    = useState<WeatherData[]>([])
   const [forecast,   setForecast]   = useState<ForecastItem[]>([])
   const [region,     setRegion]     = useState<Region>("Todas")
@@ -70,54 +81,130 @@ export default function Dashboard() {
   const alerts      = filtered.filter(w => w.alert !== "Normal")
 
   const REGIONS: Region[] = ["Todas", "Costa", "Sierra", "Selva"]
-  const TABS: { key: Tab; label: string; icon: string }[] = [
-    { key: "resumen",    label: "Resumen",    icon: "" },
-    { key: "mapa",       label: "Mapa",       icon: "" },
-    { key: "tabla",      label: "Tabla",      icon: "" },
-    { key: "pronostico", label: "Pronóstico", icon: "" },
+  const TABS: { key: Tab; label: string }[] = [
+    { key: "resumen",    label: "Resumen"    },
+    { key: "mapa",       label: "Mapa"       },
+    { key: "tabla",      label: "Tabla"      },
+    { key: "pronostico", label: "Pronóstico" },
   ]
 
-  return (
-    <main className="min-h-screen bg-slate-50 p-4 md:p-6">
+  const surface = {
+    background: "var(--color-bg-surface)",
+    border: "1px solid var(--color-border)",
+    borderRadius: 12,
+    padding: 16,
+  }
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+  return (
+    <main style={{
+      minHeight: "100vh",
+      background: "var(--color-bg-page)",
+      padding: "24px",
+      transition: "background 0.25s ease",
+    }}>
+
+      {/* ── Header ── */}
+      <div style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        marginBottom: 20,
+      }}>
         <div>
-          <h1 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-            <Radio size={16} className="text-blue-500" />
+          <h1 style={{
+            fontSize: 15,
+            fontWeight: 500,
+            color: "var(--color-text-primary)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}>
+            <Radio size={15} style={{ color: "var(--color-accent)" }} />
             Monitor Climático — Perú
           </h1>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p style={{ fontSize: 11, color: "var(--color-text-muted)", marginTop: 2 }}>
             {weather.length} estaciones · OpenWeatherMap · 25 departamentos
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-1 bg-white border border-gray-200 rounded-full p-1">
+
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          {/* Filtro región */}
+          <div style={{
+            display: "flex", gap: 2,
+            background: "var(--color-bg-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: 999,
+            padding: "3px",
+          }}>
             {REGIONS.map(r => (
-              <button key={r} onClick={() => setRegion(r)}
-                className={`px-3 py-1 text-xs rounded-full transition-all
-                  ${region === r ? "bg-blue-600 text-white" : "text-gray-500 hover:text-gray-800"}`}>
-                {r}
-              </button>
+              <button key={r} onClick={() => setRegion(r)} style={{
+                padding: "4px 12px",
+                fontSize: 11,
+                borderRadius: 999,
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.15s",
+                background: region === r ? "var(--color-accent)" : "transparent",
+                color: region === r ? "#fff" : "var(--color-text-secondary)",
+                fontWeight: region === r ? 500 : 400,
+              }}>{r}</button>
             ))}
           </div>
-          <button onClick={fetchData} disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-gray-200 bg-white rounded-full hover:border-gray-400 transition-all disabled:opacity-50">
-            <RefreshCw size={11} className={loading ? "animate-spin" : ""} />
+
+          {/* Refresh */}
+          <button onClick={fetchData} disabled={loading} style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "5px 12px",
+            fontSize: 11,
+            border: "1px solid var(--color-border)",
+            background: "var(--color-bg-surface)",
+            color: "var(--color-text-secondary)",
+            borderRadius: 999,
+            cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.5 : 1,
+            transition: "all 0.15s",
+          }}>
+            <RefreshCw size={11} style={{ animation: loading ? "spin 1s linear infinite" : "none" }} />
             {loading ? "Actualizando..." : lastUpdate ? `Actualizado ${lastUpdate}` : "Cargar"}
+          </button>
+
+          {/* Dark toggle */}
+          <button onClick={toggle}
+            aria-label={theme === "dark" ? "Modo claro" : "Modo oscuro"}
+            style={{
+              width: 32, height: 32,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: "1px solid var(--color-border)",
+              background: "var(--color-bg-surface)",
+              color: "var(--color-text-secondary)",
+              borderRadius: "50%",
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}>
+            {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
           </button>
         </div>
       </div>
 
-      {/* Error */}
+      {/* ── Error ── */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
-          ⚠️ {error}
+        <div style={{
+          marginBottom: 16,
+          padding: "10px 14px",
+          background: "var(--alert-frost-severe-bg)",
+          border: "1px solid var(--alert-frost-severe-border)",
+          borderRadius: 8,
+          fontSize: 12,
+          color: "var(--alert-frost-severe-text)",
+        }}>
+          {error}
         </div>
       )}
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      {/* ── KPIs ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 12, marginBottom: 16 }}>
         <KPICard label="Temperatura promedio" value={`${avgTemp} °C`}
           sub={`${filtered.length} estaciones · ${region}`} />
         <KPICard label="Humedad relativa"     value={`${avgHumidity} %`}
@@ -130,48 +217,69 @@ export default function Dashboard() {
           danger={alerts.length > 0} />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-gray-200">
+      {/* ── Tabs ── */}
+      <div style={{
+        display: "flex", gap: 0,
+        borderBottom: "1px solid var(--color-border)",
+        marginBottom: 16,
+      }}>
         {TABS.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-xs font-medium transition-all border-b-2 -mb-px flex items-center gap-1.5
-              ${tab === t.key
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-800"}`}>
-            <span>{t.icon}</span>{t.label}
-          </button>
+          <button key={t.key} onClick={() => setTab(t.key)} style={{
+            padding: "9px 16px",
+            fontSize: 12,
+            fontWeight: tab === t.key ? 500 : 400,
+            border: "none",
+            borderBottom: tab === t.key ? "2px solid var(--color-accent)" : "2px solid transparent",
+            marginBottom: -1,
+            background: "transparent",
+            color: tab === t.key ? "var(--color-accent)" : "var(--color-text-secondary)",
+            cursor: "pointer",
+            transition: "all 0.15s",
+          }}>{t.label}</button>
         ))}
       </div>
 
-      {/* Tab: Resumen */}
+      {/* ── Resumen ── */}
       {tab === "resumen" && (
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2 bg-white border border-gray-200 rounded-xl p-4">
-              <p className="text-xs font-medium text-gray-500 mb-3">Temperatura actual por estación</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)", gap: 16 }}>
+            <div style={surface}>
+              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 12 }}>
+                Temperatura actual por estación
+              </p>
               {loading && !weather.length
-                ? <div className="h-48 flex items-center justify-center text-gray-400 text-sm">Cargando...</div>
+                ? <div style={{ height: 192, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando...</div>
                 : <TempChart data={filtered} />}
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <p className="text-xs font-medium text-gray-500 mb-3">Eventos extremos</p>
+            <div style={surface}>
+              <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 12 }}>
+                Eventos extremos
+              </p>
               <AlertPanel data={filtered} />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))", gap: 12 }}>
             {(["Costa", "Sierra", "Selva"] as Region[]).map(reg => {
               const regData = weather.filter(w => w.region === reg)
               if (!regData.length) return null
               const avg = (regData.reduce((a, b) => a + b.temp, 0) / regData.length).toFixed(1)
               const max = Math.max(...regData.map(w => w.temp)).toFixed(1)
               const min = Math.min(...regData.map(w => w.temp)).toFixed(1)
-              const border = reg === "Costa" ? "border-l-blue-400" : reg === "Sierra" ? "border-l-purple-400" : "border-l-green-400"
               return (
-                <div key={reg} className={`bg-white border border-gray-200 border-l-4 ${border} rounded-xl p-4`}>
-                  <p className="text-xs font-medium text-gray-500 mb-2">{reg}</p>
-                  <p className="text-xl font-medium text-gray-900">{avg}°C <span className="text-xs text-gray-400">promedio</span></p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    <span className="text-red-500">↑ {max}°</span> / <span className="text-blue-500">↓ {min}°</span>
+                <div key={reg} style={{
+                  ...surface,
+                  borderLeft: `3px solid ${accentLeft[reg]}`,
+                  borderRadius: "0 12px 12px 0",
+                }}>
+                  <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 6 }}>{reg}</p>
+                  <p style={{ fontSize: 20, fontWeight: 500, color: "var(--color-text-primary)", lineHeight: 1 }}>
+                    {avg}°C <span style={{ fontSize: 11, color: "var(--color-text-muted)", fontWeight: 400 }}>promedio</span>
+                  </p>
+                  <p style={{ fontSize: 11, color: "var(--color-text-secondary)", marginTop: 6 }}>
+                    <span style={{ color: "#E53935" }}>↑ {max}°</span>
+                    {" / "}
+                    <span style={{ color: "#42A5F5" }}>↓ {min}°</span>
                     {" · "}{regData.length} estaciones
                   </p>
                 </div>
@@ -181,35 +289,38 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Tab: Mapa */}
+      {/* ── Mapa ── */}
       {tab === "mapa" && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-500 mb-3">
+        <div style={surface}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 12 }}>
             Mapa geográfico de estaciones — {filtered.length} puntos
           </p>
           {loading && !weather.length
-            ? <div className="h-96 flex items-center justify-center text-gray-400 text-sm">Cargando datos...</div>
-            : <WeatherMap data={filtered} />
-          }
+            ? <div style={{ height: 384, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando datos...</div>
+            : <WeatherMap data={filtered} />}
         </div>
       )}
 
-      {/* Tab: Tabla */}
+      {/* ── Tabla ── */}
       {tab === "tabla" && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-500 mb-4">Detalle por estación — {filtered.length} registros</p>
+        <div style={surface}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 16 }}>
+            Detalle por estación — {filtered.length} registros
+          </p>
           {loading && !weather.length
-            ? <div className="h-32 flex items-center justify-center text-gray-400 text-sm">Cargando...</div>
+            ? <div style={{ height: 128, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando...</div>
             : <StatsTable data={filtered} />}
         </div>
       )}
 
-      {/* Tab: Pronóstico */}
+      {/* ── Pronóstico ── */}
       {tab === "pronostico" && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-500 mb-4">Pronóstico 5 días — temperatura cada 3 horas</p>
+        <div style={surface}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: "var(--color-text-muted)", marginBottom: 16 }}>
+            Pronóstico 5 días — temperatura cada 3 horas
+          </p>
           {loading && !forecast.length
-            ? <div className="h-48 flex items-center justify-center text-gray-400 text-sm">Cargando pronóstico...</div>
+            ? <div style={{ height: 192, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-muted)", fontSize: 13 }}>Cargando pronóstico...</div>
             : <ForecastChart
                 data={forecast.filter(f =>
                   region === "Todas" ? true : filtered.map(w => w.station).includes(f.station)
@@ -219,9 +330,22 @@ export default function Dashboard() {
         </div>
       )}
 
-      <p className="text-center text-xs text-gray-300 mt-6">
+      <p style={{
+        textAlign: "center",
+        fontSize: 11,
+        color: "var(--color-text-muted)",
+        marginTop: 24,
+        opacity: 0.6,
+      }}>
         Datos: OpenWeatherMap API · Estaciones basadas en red SENAMHI Perú
       </p>
+
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @media (max-width: 640px) {
+          main { padding: 16px !important; }
+        }
+      `}</style>
     </main>
   )
 }

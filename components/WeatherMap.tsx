@@ -10,27 +10,29 @@ interface Props {
   data: WeatherData[]
 }
 
+/** Escala meteorológica estándar — idéntica a TempChart */
 function getTempColor(temp: number): string {
-  if (temp < 0)  return "#0C447C"
-  if (temp < 5)  return "#185FA5"
-  if (temp < 12) return "#378ADD"
-  if (temp < 18) return "#85B7EB"
-  if (temp < 24) return "#EF9F27"
-  if (temp < 30) return "#D85A30"
-  return "#E24B4A"
+  if (temp < -5) return "#1a3a6e"
+  if (temp < 0)  return "#1565C0"
+  if (temp < 5)  return "#42A5F5"
+  if (temp < 10) return "#4DD0E1"
+  if (temp < 15) return "#80CBC4"
+  if (temp < 20) return "#AED581"
+  if (temp < 25) return "#f9e84d"
+  if (temp < 30) return "#FFA726"
+  return "#E53935"
 }
 
 function getAlertColor(alert: WeatherData["alert"]): string {
   switch (alert) {
-    case "Helada severa":   return "#0C447C"
-    case "Helada moderada": return "#378ADD"
-    case "Lluvia intensa":  return "#E24B4A"
-    case "Lluvia moderada": return "#EF9F27"
-    default:                return "#1D9E75"
+    case "Helada severa":   return "#1565C0"
+    case "Helada moderada": return "#42A5F5"
+    case "Lluvia intensa":  return "#3949AB"
+    case "Lluvia moderada": return "#4DD0E1"
+    default:                return "#43A047"
   }
 }
 
-// Tipo para el contenedor del mapa con _leaflet_id interno
 interface LeafletContainer extends HTMLDivElement {
   _leaflet_id?: number
 }
@@ -42,7 +44,6 @@ export function WeatherMap({ data }: Props) {
   const [mode, setMode]         = useState<MapMode>("temperatura")
   const [mapReady, setMapReady] = useState(false)
 
-  // Inicializar mapa una sola vez
   useEffect(() => {
     if (typeof window === "undefined") return
     if (!mapRef.current)               return
@@ -93,7 +94,6 @@ export function WeatherMap({ data }: Props) {
     }
   }, [])
 
-  // Pintar marcadores cuando mapa está listo y hay datos
   useEffect(() => {
     if (!mapReady)            return
     if (!mapInstance.current) return
@@ -108,16 +108,20 @@ export function WeatherMap({ data }: Props) {
           ? getTempColor(d.temp)
           : getAlertColor(d.alert)
 
+        /* texto del marcador en oscuro para colores claros (cian, verde, amarillo) */
+        const lightColors = ["#4DD0E1", "#80CBC4", "#AED581", "#f9e84d"]
+        const textColor = lightColors.includes(color) ? "#0F1D2E" : "#ffffff"
+
         const icon: DivIcon = L.divIcon({
           className: "",
           html: `<div style="
             width:32px;height:32px;
             background:${color};
-            border:2px solid white;
+            border:2px solid rgba(255,255,255,0.85);
             border-radius:50%;
             display:flex;align-items:center;justify-content:center;
-            font-size:9px;font-weight:600;color:white;
-            box-shadow:0 2px 6px rgba(0,0,0,0.3);
+            font-size:9px;font-weight:700;color:${textColor};
+            box-shadow:0 2px 8px rgba(0,0,0,0.35);
             cursor:pointer;
           ">${d.temp.toFixed(0)}°</div>`,
           iconSize:   [32, 32],
@@ -181,58 +185,68 @@ export function WeatherMap({ data }: Props) {
     })
   }, [mapReady, data, mode])
 
+  const TEMP_LEGEND = [
+    { color: "#1a3a6e", label: "< −5°C"   },
+    { color: "#1565C0", label: "−5–0°C"   },
+    { color: "#42A5F5", label: "0–5°C"    },
+    { color: "#4DD0E1", label: "5–10°C"   },
+    { color: "#80CBC4", label: "10–15°C"  },
+    { color: "#AED581", label: "15–20°C"  },
+    { color: "#f9e84d", label: "20–25°C"  },
+    { color: "#FFA726", label: "25–30°C"  },
+    { color: "#E53935", label: "> 30°C"   },
+  ]
+
+  const ALERT_LEGEND = [
+    { color: "#43A047", label: "Normal"          },
+    { color: "#4DD0E1", label: "Lluvia moderada" },
+    { color: "#3949AB", label: "Lluvia intensa"  },
+    { color: "#42A5F5", label: "Helada moderada" },
+    { color: "#1565C0", label: "Helada severa"   },
+  ]
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex gap-1 bg-gray-100 rounded-full p-1">
+      {/* Mode toggle */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <div style={{
+          display: "flex", gap: 2,
+          background: "var(--color-bg-subtle)",
+          border: "1px solid var(--color-border)",
+          borderRadius: 999,
+          padding: 3,
+        }}>
           {(["temperatura", "alerta"] as MapMode[]).map(m => (
-            <button key={m} onClick={() => setMode(m)}
-              className={`px-3 py-1 text-xs rounded-full transition-all
-                ${mode === m
-                  ? "bg-white text-gray-800 shadow-sm font-medium"
-                  : "text-gray-500 hover:text-gray-700"}`}>
+            <button key={m} onClick={() => setMode(m)} style={{
+              padding: "4px 12px",
+              fontSize: 11,
+              borderRadius: 999,
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              background: mode === m ? "var(--color-bg-surface)" : "transparent",
+              color: mode === m ? "var(--color-text-primary)" : "var(--color-text-muted)",
+              fontWeight: mode === m ? 500 : 400,
+              boxShadow: mode === m ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+            }}>
               {m === "temperatura" ? "Temperatura" : "Alertas"}
             </button>
           ))}
         </div>
-        <span className="text-xs text-gray-400">{data.length} estaciones</span>
+        <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>{data.length} estaciones</span>
       </div>
 
-      <div
-        ref={mapRef}
-        style={{ height: "420px", borderRadius: "10px", overflow: "hidden", zIndex: 0 }}
-      />
+      <div ref={mapRef} style={{ height: "420px", borderRadius: 10, overflow: "hidden", zIndex: 0 }} />
 
-      <div className="flex flex-wrap gap-3 mt-3">
-        {mode === "temperatura" ? (
-          <>
-            <LegendItem color="#0C447C" label="< 0°C"   />
-            <LegendItem color="#185FA5" label="0–5°C"   />
-            <LegendItem color="#378ADD" label="5–12°C"  />
-            <LegendItem color="#85B7EB" label="12–18°C" />
-            <LegendItem color="#EF9F27" label="18–24°C" />
-            <LegendItem color="#D85A30" label="24–30°C" />
-            <LegendItem color="#E24B4A" label="> 30°C"  />
-          </>
-        ) : (
-          <>
-            <LegendItem color="#1D9E75" label="Normal"          />
-            <LegendItem color="#EF9F27" label="Lluvia moderada" />
-            <LegendItem color="#E24B4A" label="Lluvia intensa"  />
-            <LegendItem color="#378ADD" label="Helada moderada" />
-            <LegendItem color="#0C447C" label="Helada severa"   />
-          </>
-        )}
+      {/* Leyenda */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", marginTop: 12 }}>
+        {(mode === "temperatura" ? TEMP_LEGEND : ALERT_LEGEND).map(({ color, label }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--color-text-secondary)" }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0 }} />
+            {label}
+          </div>
+        ))}
       </div>
-    </div>
-  )
-}
-
-function LegendItem({ color, label }: { color: string; label: string }) {
-  return (
-    <div className="flex items-center gap-1.5 text-xs text-gray-600">
-      <div style={{ width: 12, height: 12, borderRadius: "50%", background: color, flexShrink: 0 }} />
-      {label}
     </div>
   )
 }

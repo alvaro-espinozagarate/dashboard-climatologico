@@ -11,15 +11,84 @@
   padding: 0;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  --color-bg-page:     #F0F4F8;
+  --color-bg-surface:  #FFFFFF;
+  --color-bg-subtle:   #EBF0F6;
+  --color-border:      #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  --color-accent:      #0066CC;
+  --color-accent-hover:#0052A3;
+  --color-accent-light:#E3F0FF;
+
+  --color-text-primary:   #0F1D2E;
+  --color-text-secondary: #4A5E72;
+  --color-text-muted:     #8FA3B8;
+
+  /* Alertas semánticas */
+  --alert-rain-moderate-bg:     #E3F2FD;
+  --alert-rain-moderate-border: #90CAF9;
+  --alert-rain-moderate-text:   #1565C0;
+  --alert-rain-heavy-bg:        #E8EAF6;
+  --alert-rain-heavy-border:    #9FA8DA;
+  --alert-rain-heavy-text:      #283593;
+  --alert-frost-moderate-bg:    #FFF8E1;
+  --alert-frost-moderate-border:#FFD54F;
+  --alert-frost-moderate-text:  #E65100;
+  --alert-frost-severe-bg:      #FBE9E7;
+  --alert-frost-severe-border:  #FF8A65;
+  --alert-frost-severe-text:    #BF360C;
+  --alert-normal-bg:            #E8F5E9;
+  --alert-normal-border:        #A5D6A7;
+  --alert-normal-text:          #1B5E20;
 }
 
-/* Evitar que el z-index de Leaflet tape elementos del dashboard */
-.leaflet-pane         { z-index: 1 !important; }
+.dark {
+  --color-bg-page:     #111B27;
+  --color-bg-surface:  #1A2638;
+  --color-bg-subtle:   #1F2E40;
+  --color-border:      #263548;
+  --color-border-strong: #324860;
+
+  --color-accent:      #3B9EFF;
+  --color-accent-hover:#5AADFF;
+  --color-accent-light:#0D2A47;
+
+  --color-text-primary:   #E8F1FA;
+  --color-text-secondary: #8BA5BF;
+  --color-text-muted:     #4E6577;
+
+  /* Alertas semánticas — modo oscuro */
+  --alert-rain-moderate-bg:     #0D2240;
+  --alert-rain-moderate-border: #1E4D80;
+  --alert-rain-moderate-text:   #90CAF9;
+  --alert-rain-heavy-bg:        #12174A;
+  --alert-rain-heavy-border:    #3949AB;
+  --alert-rain-heavy-text:      #9FA8DA;
+  --alert-frost-moderate-bg:    #2C1F00;
+  --alert-frost-moderate-border:#7A5800;
+  --alert-frost-moderate-text:  #FFD54F;
+  --alert-frost-severe-bg:      #2C1000;
+  --alert-frost-severe-border:  #8B3A00;
+  --alert-frost-severe-text:    #FF8A65;
+  --alert-normal-bg:            #0A2210;
+  --alert-normal-border:        #1B5E20;
+  --alert-normal-text:          #A5D6A7;
+}
+
+/* ── Base ──────────────────────────────────────────────────── */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ── Leaflet z-index ───────────────────────────────────────── */
+.leaflet-pane        { z-index: 1 !important; }
 .leaflet-top,
-.leaflet-bottom       { z-index: 2 !important; }
-.leaflet-control      { z-index: 2 !important; }
-.leaflet-popup-pane   { z-index: 3 !important; }
+.leaflet-bottom      { z-index: 2 !important; }
+.leaflet-control     { z-index: 2 !important; }
+.leaflet-popup-pane  { z-index: 3 !important; }
